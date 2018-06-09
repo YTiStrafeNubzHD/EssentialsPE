@@ -113,7 +113,6 @@ class Loader extends PluginBase{
         if($this->getAPI()->isUpdaterEnabled()){
             $this->getAPI()->fetchEssentialsPEUpdate(false);
         }
-        $this->getAPI()->scheduleAutoAFKSetter();
     }
 
     public function onDisable(): void{
