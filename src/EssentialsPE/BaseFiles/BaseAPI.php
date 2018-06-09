@@ -2209,7 +2209,6 @@ class BaseAPI{
             return false;
         }
         $this->getServer()->getLogger()->debug(TextFormat::YELLOW . "Running EssentialsPE's UpdateFetchTask");
-        $this->updaterTask = $task;
         return true;
     }
 
