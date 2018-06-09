@@ -791,7 +791,7 @@ class BaseAPI{
      */
     public function getServerGeoLocation(): string{
         if($this->serverGeoLocation === null){
-            $this->getServer()->getScheduler()->scheduleAsyncTask(new GeoLocation(null));
+            $this->getServer()->getAsyncPool->submitTask(new GeoLocation(null));
         }
         return $this->serverGeoLocation;
     }
@@ -1832,7 +1832,7 @@ class BaseAPI{
             }
             $r[] = $this->sessions[$spl];
         }
-        $this->getServer()->getScheduler()->scheduleAsyncTask(new GeoLocation($player));
+        $this->getServer()->getAsyncPool()->submitTask(new GeoLocation($player));
         $this->getEssentialsPEPlugin()->getLogger()->debug("Finished session creation.");
         return $r;
     }
