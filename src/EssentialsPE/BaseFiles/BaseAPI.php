@@ -269,10 +269,10 @@ class BaseAPI{
         $this->getSession($player)->setAFK($state);
         $time = $this->getEssentialsPEPlugin()->getConfig()->getNested("afk.auto-kick");
         if(!$state && ($id = $this->getSession($player)->getAFKKickTaskID()) !== null){
-            $this->getServer()->getScheduler()->cancelTask($id);
+            $this->getEssentialsPEPlugin()->getScheduler()->cancelTask($id);
             $this->getSession($player)->removeAFKKickTaskID();
         }elseif($state && (is_int($time) && $time  > 0) && !$player->hasPermission("essentials.afk.kickexempt")){
-            $task = $this->getServer()->getScheduler()->scheduleDelayedTask(new AFKKickTask($this, $player), $time * 20);
+            $task = $this->getEssentialsPEPlugin()->getScheduler()->scheduleDelayedTask(new AFKKickTask($this, $player), $time * 20);
             $this->getSession($player)->setAFKKickTaskID($task->getTaskId());
         }
         $player->sendMessage(TextFormat::YELLOW . "You're " . ($this->isAFK($player) ? "now" : "no longer") . " AFK");
@@ -299,7 +299,7 @@ class BaseAPI{
      */
     public function scheduleAutoAFKSetter(): void{
         if(is_int($v = $this->getEssentialsPEPlugin()->getConfig()->getNested("afk.auto-set")) && $v > 0){
-            $this->getServer()->getScheduler()->scheduleDelayedTask(new AFKSetterTask($this), 600); // Check every 30 seconds...
+            $this->getEssentialsPEPlugin()->getScheduler()->scheduleDelayedTask(new AFKSetterTask($this), 600); // Check every 30 seconds...
         }
     }
 
@@ -2093,7 +2093,7 @@ class BaseAPI{
      * @param Player $player
      */
     private function scheduleTPRequestTask(Player $player): void{
-        $task = $this->getServer()->getScheduler()->scheduleDelayedTask(new TPRequestTask($this, $player), 20 * 60 * 5);
+        $task = $this->getEssentialsPEPlugin()->getScheduler()->scheduleDelayedTask(new TPRequestTask($this, $player), 20 * 60 * 5);
         $this->getSession($player)->setRequestToTaskID($task->getTaskId());
     }
 
@@ -2103,7 +2103,7 @@ class BaseAPI{
      * @param Player $player
      */
     private function cancelTPRequestTask(Player $player): void{
-        $this->getServer()->getScheduler()->cancelTask($this->getSession($player)->getRequestToTaskID());
+        $this->getEssentialsPEPlugin()->getScheduler()->cancelTask($this->getSession($player)->getRequestToTaskID());
         $this->getSession($player)->removeRequestToTaskID();
     }
 
@@ -2218,7 +2218,7 @@ class BaseAPI{
      */
     public function scheduleUpdaterTask(): void{
         if($this->isUpdaterEnabled()){
-            $this->getServer()->getScheduler()->scheduleDelayedTask(new AutoFetchCallerTask($this), $this->getUpdaterInterval() * 20);
+            $this->getEssentialsPEPlugin()->getScheduler()->scheduleDelayedTask(new AutoFetchCallerTask($this), $this->getUpdaterInterval() * 20);
         }
     }
 
