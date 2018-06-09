@@ -297,12 +297,9 @@ class BaseAPI{
      * For internal use ONLY
      *
      * This function schedules the global Auto-AFK setter
+     * [THIS FUNCTION HAS BEEN REMOVED to fix a bug!]
      */
-    public function scheduleAutoAFKSetter(): void{
-        if(is_int($v = $this->getEssentialsPEPlugin()->getConfig()->getNested("afk.auto-set")) && $v > 0){
-            $this->scheduleDelayedTask(new AFKSetterTask($this), 600); // Check every 30 seconds...
-        }
-    }
+
 
     /**
      * Get the last time that a player moved
