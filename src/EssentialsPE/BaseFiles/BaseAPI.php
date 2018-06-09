@@ -50,6 +50,7 @@ use pocketmine\network\mcpe\protocol\SetTimePacket;
 use pocketmine\OfflinePlayer;
 use pocketmine\permission\Permission;
 use pocketmine\Player;
+use pocketmine\scheduler\Task;
 use pocketmine\Server;
 use pocketmine\utils\Config;
 use pocketmine\utils\Random;
@@ -296,12 +297,8 @@ class BaseAPI{
      * For internal use ONLY
      *
      * This function schedules the global Auto-AFK setter
+     *[THIS FUNCTION HAS BEEN REMOVED because of a bug!!!]
      */
-    public function scheduleAutoAFKSetter(): void{
-        if(is_int($v = $this->getEssentialsPEPlugin()->getConfig()->getNested("afk.auto-set")) && $v > 0){
-            $this->getServer()->getScheduler()->scheduleDelayedTask(new AFKSetterTask($this), 600); // Check every 30 seconds...
-        }
-    }
 
     /**
      * Get the last time that a player moved
@@ -1832,7 +1829,7 @@ class BaseAPI{
             }
             $r[] = $this->sessions[$spl];
         }
-        $this->getServer()->getScheduler()->scheduleAsyncTask(new GeoLocation($player));
+        $this->getScheduler()->scheduleAsyncTask(new GeoLocation($player));
         $this->getEssentialsPEPlugin()->getLogger()->debug("Finished session creation.");
         return $r;
     }
@@ -2208,8 +2205,6 @@ class BaseAPI{
             return false;
         }
         $this->getServer()->getLogger()->debug(TextFormat::YELLOW . "Running EssentialsPE's UpdateFetchTask");
-        $this->getEssentialsPEPlugin()->getScheduler()->scheduleAsyncTask($task = new UpdateFetchTask($this->getUpdateBuild(), $install));
-        $this->updaterTask = $task;
         return true;
     }
 
