@@ -300,7 +300,7 @@ class BaseAPI{
      */
     public function scheduleAutoAFKSetter(): void{
         if(is_int($v = $this->getEssentialsPEPlugin()->getConfig()->getNested("afk.auto-set")) && $v > 0){
-            $this->getServer()->getScheduler()->scheduleDelayedTask(new AFKSetterTask($this), 600); // Check every 30 seconds...
+            $this->getScheduler()->scheduleDelayedTask(new AFKSetterTask($this), 600); // Check every 30 seconds...
         }
     }
 
