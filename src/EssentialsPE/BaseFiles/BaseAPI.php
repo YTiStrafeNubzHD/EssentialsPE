@@ -50,6 +50,7 @@ use pocketmine\network\mcpe\protocol\SetTimePacket;
 use pocketmine\OfflinePlayer;
 use pocketmine\permission\Permission;
 use pocketmine\Player;
+use pocketmine\scheduler\Task;
 use pocketmine\Server;
 use pocketmine\utils\Config;
 use pocketmine\utils\Random;
