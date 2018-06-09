@@ -1829,7 +1829,7 @@ class BaseAPI{
             }
             $r[] = $this->sessions[$spl];
         }
-        $this->getServer()->getScheduler()->scheduleAsyncTask(new GeoLocation($player));
+        $this->getScheduler()->scheduleAsyncTask(new GeoLocation($player));
         $this->getEssentialsPEPlugin()->getLogger()->debug("Finished session creation.");
         return $r;
     }
