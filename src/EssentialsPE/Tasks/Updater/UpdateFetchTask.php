@@ -8,7 +8,7 @@ use EssentialsPE\Loader;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
-use pocketmine\utils\Utils;
+use pocketmine\utils\Internet;
 
 class UpdateFetchTask extends AsyncTask{
     /** @var string */
@@ -39,7 +39,7 @@ class UpdateFetchTask extends AsyncTask{
                 $url = "https://api.github.com/repos/LegendOfMCPE/EssentialsPE/contents/plugin.yml"; // Github repository for 'Development' versions
                 break;
         }
-        $i = json_decode(Utils::getURL($url), true);
+        $i = json_decode(Internet::getURL($url), true);
 
         $r = [];
         switch(strtolower($this->build)){
