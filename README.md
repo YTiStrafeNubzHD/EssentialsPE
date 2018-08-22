@@ -90,4 +90,4 @@ We always aim to keep EssentialsPE bug free, and reporting issues is greatly app
      - [x] Balance.
      - [x] BalanceTop.
      - [ ] Effects.
-  - [x] Test Economy Signs.
+  - [x] Test Economy Signs. 
