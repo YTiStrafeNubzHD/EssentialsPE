@@ -48,6 +48,7 @@ class ClearInventory extends BaseCommand{
             return false;
         }
         $player->getInventory()->clearAll();
+        $player->getArmorInventory()->clearAll();
         $player->sendMessage(TextFormat::AQUA . "Your inventory was cleared");
         if($player !== $sender){
             $sender->sendMessage(TextFormat::AQUA . $player->getDisplayName() . (substr($player->getDisplayName(), -1, 1) === "s" ? "'" : "'s") . " inventory was cleared");
