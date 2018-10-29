@@ -10,7 +10,6 @@ use pocketmine\event\entity\EntityExplodeEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\server\CommandEvent;
 
-
 class OtherEvents extends BaseEventHandler{
     /**
      * @param CommandEvent $event
