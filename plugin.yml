@@ -1,7 +1,7 @@
 name: EssentialsPE
 main: EssentialsPE\Loader
-version: 2.0.0
-api: [3.0.0-ALPHA12, 3.0.0, 4.0.0]
+version: 2.1.1
+api: [3.0.0, 4.0.0]
 author: LegendsOfMCPE Team
 website: https://github.com/LegendOfMCPE/EssentialsPE
 
@@ -46,23 +46,6 @@ permissions:
                     essentials.back.use:
                         default: op
                         description: "Return to your previous spot before teleporting"
-            essentials.balance:
-                default: false
-                description: "Allow players to see their balance"
-                children:
-                    essentials.balance.use:
-                        default: true
-                        description: "See your current balance"
-                    essentials.balance.other:
-                        default: op
-                        description: "Let players to see other's balance"
-            essentials.balancetop:
-                default: false
-                description: "Allow seeing the balance top"
-                children:
-                    essentials.balancetop.use:
-                        default: true
-                        description: "See the balance top"
             essentials.bigtree:
                 default: op
                 description: "Spawns a big tree"
@@ -107,16 +90,6 @@ permissions:
             essentials.depth:
                 default: true
                 description: "Get your current height related to sea-level"
-            essentials.eco:
-                default: false
-                description: "Access to the /eco command"
-                children:
-                    essentials.eco.use:
-                        default: op
-                        description: "Access the /eco command"
-                    essentials.eco.loan:
-                        default: true
-                        description: "Allow players to have negative balance"
             essentials.essentials:
                 default: op
                 description: "See the current Essentials version"
@@ -248,16 +221,6 @@ permissions:
                     essentials.kill.other:
                         default: op
                         description: "Kill other players"
-            essentials.kit:
-                default: false
-                description: "Access to the /kit command"
-                children:
-                    essentials.kit.use:
-                        default: true
-                        description: "Access to the /kit command"
-                    essentials.kit.other:
-                        default: op
-                        description: "Give a kit to other players"
             essentials.lightning:
                 default: op
                 description: "Strike a lightning!"
@@ -313,9 +276,6 @@ permissions:
             essentials.oversizedstacks:
                 default: op
                 description: "Allow to get oversized stacks"
-            essentials.pay:
-                default: true
-                description: "Pay another player from your balance"
             essentials.powertool:
                 default: false
                 description: "Allow to toggle and use PowerTool"
@@ -364,9 +324,6 @@ permissions:
             essentials.seen:
                 default: op
                 description: "Check player's last online time"
-            essentials.sell:
-                default: true
-                description: "Sell an item with the /sell command"
             essentials.sethome:
                 default: true
                 description: "Create/update a home"
@@ -376,9 +333,6 @@ permissions:
             essentials.setwarp:
                 default: op
                 description: "Create/update a warp"
-            essentials.setworth:
-                default: op
-                description: "Sets the worth of an item"
             essentials.sign:
                 default: false
                 description: "Allow to manage special signs"
@@ -396,9 +350,6 @@ permissions:
                             essentials.sign.break.heal:
                                 default: op
                                 description: "Allow to remove heal signs"
-                            essentials.sign.break.kit:
-                                default: op
-                                description: "Allow to remove kit signs"    
                             essentials.sign.break.repair:
                                 default: op
                                 description: "Allow to remove repair signs"
@@ -411,18 +362,6 @@ permissions:
                             essentials.sign.break.warp:
                                 default: op
                                 description: "Allow to remove Warp signs"
-                            essentials.sign.break.balance:
-                                default: op
-                                description: "Allow to remove Balance signs"
-                            essentials.sign.break.buy:
-                                default: op
-                                description: "Allow to remove Buy signs"
-                            essentials.sign.break.sell:
-                                default: op
-                                description: "Allow to remove Sell signs"
-                            essentials.sign.break.balancetop:
-                                default: op
-                                description: "Allow to remove BalanceTop signs"
                     essentials.sign.color:
                         default: op
                         description: "Allow to create colored signs"
@@ -439,9 +378,6 @@ permissions:
                             essentials.sign.create.heal:
                                 default: op
                                 description: "Allow to create Heal signs"
-                            essentials.sign.create.kit:
-                                default: op
-                                description: "Allow to create Kit signs"
                             essentials.sign.create.repair:
                                 default: op
                                 description: "Allow to create Repair signs"
@@ -454,18 +390,6 @@ permissions:
                             essentials.sign.create.warp:
                                 default: op
                                 description: "Allow to create Warp signs"
-                            essentials.sign.create.balance:
-                                default: op
-                                description: "Allow to create Balance signs"
-                            essentials.sign.create.sell:
-                                default: op
-                                description: "Allow to create Sell signs"
-                            essentials.sign.create.buy:
-                                default: op
-                                description: "Allow to create Buy signs"
-                            essentials.sign.create.balancetop:
-                                default: op
-                                description: "Allow to create BalanceTop signs"
                     essentials.sign.nopay:
                         default: false
                         description: "Bypass paying for special signs"
@@ -482,9 +406,6 @@ permissions:
                             essentials.sign.use.heal:
                                 default: op
                                 description: "Allow to use Heal signs"
-                            essentials.sign.use.kit:
-                                default: op
-                                description: "Allow to use Kit signs"
                             essentials.sign.use.repair:
                                 default: op
                                 description: "Allow to use Repair signs"
@@ -497,18 +418,6 @@ permissions:
                             essentials.sign.use.warp:
                                 default: op
                                 description: "Allow to use Warp signs"
-                            essentials.sign.use.balance:
-                                default: true
-                                description: "Allow to use Balance signs"
-                            essentials.sign.use.buy:
-                                default: true
-                                description: "Allow to use Buy signs"
-                            essentials.sign.use.sell:
-                                default: true
-                                description: "Allow to use Sell signs"
-                            essentials.sign.use.balancetop:
-                                default: true
-                                description: "Allow to use BalanceTop signs"
             essentials.spawn:
                 default: false
                 description: "Teleport to server's main spawn"
@@ -569,16 +478,6 @@ permissions:
                     essentials.unlimited.other:
                         default: op
                         description: "Allow to enable unlimited placing of blocks to other players"
-            essentials.update:
-                default: false
-                description: "Allow to update EssentialsPE to the latest available version, or to check if there is one available"
-                children:
-                    essentials.update.use:
-                        default: op
-                        description: "Allow to update EssentialsPE with the '/essentials update' command "
-                    essentials.update.notify:
-                        default: op
-                        description: "Get notified when a new version of EssentialsPE if found"
             essentials.vanish:
                 default: false
                 description: "Hide yourself or another player"
@@ -608,6 +507,3 @@ permissions:
             essentials.world:
                 default: op
                 description: "Teleport to another world"
-            essentials.worth:
-                default: true
-                description: "Get the price of an item"
