@@ -18,14 +18,12 @@ use EssentialsPE\Tasks\AFK\AFKKickTask;
 use EssentialsPE\Tasks\AFK\AFKSetterTask;
 use EssentialsPE\Tasks\GeoLocation;
 use EssentialsPE\Tasks\TPRequestTask;
-use EssentialsPE\Tasks\Updater\AutoFetchCallerTask;
-use EssentialsPE\Tasks\Updater\UpdateFetchTask;
-use EssentialsPE\Tasks\Updater\UpdateInstallTask;
 use pocketmine\block\Block;
 use pocketmine\command\CommandSender;
 use pocketmine\entity\Effect;
+use pocketmine\entity\EffectInstance;
 use pocketmine\entity\Entity;
-use pocketmine\entity\PrimedTNT;
+use pocketmine\entity\object\PrimedTNT;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\inventory\BaseInventory;
 use pocketmine\IPlayer;
@@ -61,11 +59,7 @@ class BaseAPI{
     private $ess;
     /** @var BaseAPI */
     private static $instance;
-
-    /** @var Config */
-    private $economy;
-    /** @var array */
-    private $kits = [];
+    
     /** @var array */
     private $warps = [];
 
@@ -105,29 +99,6 @@ class BaseAPI{
     }
 
     private final function saveConfigs(): void{
-        $this->economy = new Config($this->getEssentialsPEPlugin()->getDataFolder() . "Economy.yml", Config::YAML);
-        $keys = ["default-balance", "max-money", "min-money"];
-        foreach($keys as $k){
-            if(!is_int($k)){
-                $value = 0;
-                switch($k){
-                    case "default-balance":
-                        $value = 0;
-                    break;
-                
-                    case "max-money":
-                        $value = 10000000000000;
-                    break;
-                
-                    case "min-money":
-                        $value = 0;
-                    break;
-                }
-                $this->economy->set($k, $value);
-            }
-        }
-
-        $this->loadKits();
         $this->loadWarps();
         $this->updateHomesAndNicks();
     }
@@ -158,21 +129,9 @@ class BaseAPI{
         }
     }
 
-    private final function loadKits(): void{
-        $parent = new Permission("essentials.kits");
-        PermissionManager::getInstance()->addPermission($parent);
-
-        $cfg = new Config($this->getEssentialsPEPlugin()->getDataFolder() . "Kits.yml", Config::YAML);
-        foreach($cfg->getAll() as $n => $i){
-            $this->kits[$n] = new BaseKit($n, $i);
-            $child = new Permission("essentials.kits." . $n);
-            $child->addParent($parent, true);
-            PermissionManager::getInstance()->addPermission($child);
-        }
-    }
-
     private final function loadWarps(): void{
         $parent = new Permission("essentials.warps", null, null);
+        PermissionManager::getInstance()->addPermission($parent);
         PermissionManager::getInstance()->addPermission($parent);
 
         $cfg = new Config($this->getEssentialsPEPlugin()->getDataFolder() . "Warps.yml", Config::YAML);
@@ -209,8 +168,6 @@ class BaseAPI{
 
     public function reloadFiles(): void{
         $this->getEssentialsPEPlugin()->getConfig()->reload();
-        $this->economy->reload();
-        $this->loadKits();
         $this->loadWarps();
         $this->updateHomesAndNicks();
     }
@@ -377,209 +334,6 @@ class BaseAPI{
      */
     public function removePlayerLastPosition(Player $player): void{
         $this->getSession($player)->removeLastPosition();
-    }
-
-    /**  ______
-     *  |  ____|
-     *  | |__   ___ ___  _ __   ___  _ __ ___  _   _
-     *  |  __| / __/ _ \| '_ \ / _ \| '_ ` _ \| | | |
-     *  | |___| (_| (_) | | | | (_) | | | | | | |_| |
-     *  |______\___\___/|_| |_|\___/|_| |_| |_|\__, |
-     *                                          __/ |
-     *                                         |___/
-     */
-
-    /**
-     * Get the default balance for new players
-     *
-     * @return int
-     */
-    public function getDefaultBalance(): int{
-        return (int) $this->economy->get("default-balance");
-    }
-
-    /**
-     * Get the max balance that a player can own
-     *
-     * @return int
-     */
-    public function getMaxBalance(): int{
-        return (int) $this->economy->get("max-money");
-    }
-
-    /**
-     * Gets the minimum balance that a player can own
-     *
-     * @return int
-     */
-    public function getMinBalance(): int{
-        return (int) $this->economy->get("min-money");
-    }
-
-    /**
-     * Returns the currency symbol
-     *
-     * @return string
-     */
-    public function getCurrencySymbol(): string{
-        return (string) $this->economy->get("currency-symbol");
-    }
-
-    /**
-     * Return the top 5 players with most money
-     *
-     * @param CommandSender $player
-     *
-     * @return bool
-     */
-    public function sendBalanceTop(Player $player): void{
-        $moneyList = $this->economy->get("player-balances");
-        arsort($moneyList);
-        $i = 0;
-        foreach($moneyList as $playerName => $money) {
-            if($i <= 4) {
-                $player->sendMessage($playerName . " - " . TextFormat::GREEN . $money);
-            } else {
-            	break;
-            }
-            $i++;
-        }
-    }
-    
-    /**
-     * Return the current balance of a player.
-     *
-     * @param Player $player
-     * @return int
-     */
-    public function getPlayerBalance(Player $player): int{
-        $balance = $this->economy->getNested("player-balances." . $player->getName());
-        if(!$balance){
-            $this->setPlayerBalance($player, $b = $this->getDefaultBalance());
-            return $b;
-        }
-        return $balance;
-    }
-
-    /**
-     * Sets the balance of a player
-     *
-     * @param Player $player
-     * @param int $balance
-     */
-    public function setPlayerBalance(Player $player, int $balance): void{
-        if($balance > $this->getMaxBalance()){
-            $balance = $this->getMaxBalance();
-        }elseif($balance < $this->getMinBalance()){
-            $balance = $this->getMinBalance();
-        }elseif($balance < 0 && !$player->hasPermission("essentials.eco.load")){
-            $balance = 0;
-        }
-        $this->economy->setNested("player-balances." . $player->getName(), $balance);
-        $this->economy->save();
-    }
-
-    /**
-     * Sums a quantity to player's balance
-     * NOTE: You can also specify negative quantities!
-     *
-     * @param Player $player
-     * @param int $quantity
-     */
-    public function addToPlayerBalance(Player $player, int $quantity): void{
-        $balance = $this->getPlayerBalance($player) + $quantity;
-        if($balance > $this->getMaxBalance()){
-            $balance = $this->getMaxBalance();
-        }elseif($balance < $this->getMinBalance()){
-            $balance = $this->getMinBalance();
-        }elseif($balance < 0 && !$player->hasPermission("essentials.eco.loan")){
-            $balance = 0;
-        }
-        $this->setPlayerBalance($player, $balance);
-    }
-
-    /**
-     * Get the worth of an item
-     *
-     * @param int $itemId
-     * @return int
-     */
-    public function getItemWorth(int $itemId): int{
-        return $this->economy->getNested("worth." . $itemId, false);
-    }
-
-    /**
-     * Sets the worth of an item
-     *
-     * @param int $itemId
-     * @param int $worth
-     */
-    public function setItemWorth(int $itemId, int $worth): void{
-        $this->economy->setNested("worth." . $itemId, $worth);
-        $this->economy->save();
-    }
-
-    /**
-     * @param Player $player
-     * @param Item $item
-     * @param int|null $amount
-     *
-     * @return array|bool|int
-     */
-    public function sellPlayerItem(Player $player, Item $item, int $amount = null){
-        if(!$this->getItemWorth($item->getId())){
-            return false;
-        }
-        /** @var Item[] $contents */
-        $contents = [];
-        $quantity = 0;
-        foreach($player->getInventory()->getContents() as $s => $i){
-            if($i->getId() === $item->getId() && $i->getDamage() === $item->getDamage()){
-                $contents[$s] = clone $i;
-                $quantity += $i->getCount();
-            }
-        }
-        $worth = $this->getItemWorth($item->getId());
-        if($amount === null){
-            $worth *= $quantity;
-            $player->getInventory()->remove($item);
-            $this->addToPlayerBalance($player, $worth);
-            return $worth;
-        }
-        $amount = (int) $amount;
-        if($amount < 0){
-            $amount = $quantity - $amount;
-        }elseif($amount > $quantity){
-            return -1;
-        }
-
-        $count = $amount;
-        foreach($contents as $s => $i){
-            if(($count - $i->getCount()) >= 0){
-                $count -= $i->getCount();
-                $i->setCount(0);
-            }else{
-                $c = $i->getCount() - $count;
-                $i->setCount($c);
-                $count = 0;
-            }
-            if($count <= 0){
-                break;
-            }
-        }
-        return [$amount, $worth];
-    }
-    
-    /**
-     * @param Player $player
-     * @param int $amount
-     * @return bool
-     */
-    public function hasPlayerBalance(Player $player, int $amount): bool{
-        if($this->getPlayerBalance($player) >= $amount) {
-            return true;
-        }
-        return false;
     }
 
     /**  ______       _   _ _   _
@@ -792,7 +546,7 @@ class BaseAPI{
      */
     public function getServerGeoLocation(): string{
         if($this->serverGeoLocation === null){
-            $this->getServer()->getAsyncPool->submitTask(new GeoLocation(null));
+            $this->getServer()->getAsyncPool()->submitTask(new GeoLocation(null));
         }
         return $this->serverGeoLocation;
     }
@@ -936,16 +690,16 @@ class BaseAPI{
      *   _| |_| ||  __| | | | | \__ \
      *  |_____|\__\___|_| |_| |_|___/
      */
-
-    /**
-     * Easy get an item by name and metadata.
-     * The way this function understand the information about the item is:
-     * 'ItemNameOrID:Metadata' - Example (Granite block item):
-     *      '1:1' - or - 'stone:1'
-     *
-     * @param string $item_name
-     * @return Item|ItemBlock
-     */
+	/**
+	 * Easy get an item by name and metadata.
+	 * The way this function understand the information about the item is:
+	 * 'ItemNameOrID:Metadata' - Example (Granite block item):
+	 *      '1:1' - or - 'stone:1'
+	 *
+	 * @param string $item_name
+	 * @return Item|ItemBlock
+	 * @throws \ReflectionException
+	 */
     public function getItem(string $item_name): Item{
         if(strpos($item_name, ":") !== false){
             $v = explode(":", $item_name);
@@ -967,13 +721,14 @@ class BaseAPI{
 
         return $item;
     }
-
+	
 	/**
 	 * Returns a name of an item using the class constants of the Item class.
 	 * This name is not equal to the getName() function from Item classes.
 	 *
 	 * @param Item $item
 	 * @return string|null
+	 * @throws \ReflectionException
 	 */
 	public function getReadableName(Item $item): string{
 	    $itemClass = new \ReflectionClass("pocketmine\\item\\Item");
@@ -990,12 +745,13 @@ class BaseAPI{
 		}
 		return implode(" ", $finalItemName);
 	}
-
+	
 	/**
 	 * Converts the readable item name (made using function above) to an Item object.
 	 *
 	 * @param string $item_name
 	 * @return Item
+	 * @throws \ReflectionException
 	 */
 	public function readableNameToItem(string $item_name): Item{
 		$itemClass = new \ReflectionClass("pocketmine\\item\\Item");
@@ -1114,54 +870,6 @@ class BaseAPI{
         return isset($this->condenseShapes[0][$item->getId()]) || isset($this->condenseShapes[1][$item->getId()]);
     }
 
-    /**  _  ___ _
-     *  | |/ (_| |
-     *  | ' / _| |_ ___
-     *  |  < | | __/ __|
-     *  | . \| | |_\__ \
-     *  |_|\_|_|\__|___/
-     */
-
-    /**
-     * Check if a kit exists
-     *
-     * @param string $kit
-     * @return bool
-     */
-    public function kitExists(string $kit): bool{
-        return $this->validateName($kit, false) && isset($this->kits[$kit]);
-    }
-
-    /**
-     * Return the contents of a kit, if existent
-     *
-     * @param string $kit
-     * @return bool|BaseKit
-     */
-    public function getKit(string $kit): ?BaseKit{
-        if(!$this->kitExists($kit)){
-            return null;
-        }
-        return $this->kits[$kit];
-    }
-
-    /**
-     * Get a list of all available kits
-     *
-     * @param bool $inArray
-     * @return array|bool|string
-     */
-    public function kitList(bool $inArray = false){
-        $list = array_keys($this->kits);
-        if(count($list) < 1){
-            return false;
-        }
-        if(!$inArray){
-            return implode(", ", $list);
-        }
-        return $list;
-    }
-
     /**  __  __
      *  |  \/  |
      *  | \  / | ___ ___ ___  __ _  __ _  ___ ___
@@ -1215,7 +923,7 @@ class BaseAPI{
     }
 
     /**
-     * Checks if a name is valid, it could be for a Nick, Home, Warp, etc...
+     * Checks if a name is valid, it could be for a Home, Warp, etc...
      *
      * @param string $string
      * @param bool $allowColorCodes
@@ -1445,7 +1153,7 @@ class BaseAPI{
      * @return null|Player
      */
     public function getPlayer($player): ?Player{
-        if(!$this->validateName($player, false)){
+        if(!Player::isValidUserName($player)){
             return null;
         }
         $player = strtolower($player);
@@ -1483,13 +1191,14 @@ class BaseAPI{
         }
         return $found;
     }
+
     /**
      * Let you search for a player using his Display name(Nick) or Real name
      * Instead of returning false, this method will create an OfflinePlayer object.
      *
      * @param string $name
      *
-     * @return Player|OfflinePlayer
+     * @return IPlayer|Player|OfflinePlayer
      */
     public function getOfflinePlayer(string $name): IPlayer{
         $player = $this->getPlayer($name);
@@ -1533,7 +1242,6 @@ class BaseAPI{
         return [
             "name" => $player->getName(),
             "nick" => $player->getDisplayName(),
-            //"money" => $this->getPlayerBalance($player), TODO
             "afk" => $this->isAFK($player),
             "location" => $this->getGeoLocation($player)
         ];
@@ -1815,14 +1523,10 @@ class BaseAPI{
                     $this->getEssentialsPEPlugin()->getLogger()->info($p->getName() . " is also known as " . $n);
                     unset($values["nick"]);
                 }
-                $v = BaseSession::$defaults["isVanished"];
-                $vNP = BaseSession::$defaults["noPacket"];
                 if(isset($values["isVanished"])){
                     if(!isset($values["noPacket"])){
                         $values["noPacket"] = false;
                     }
-                    $v = $values["isVanished"];
-                    $vNP = $values["noPacket"];
                     unset($values["isVanished"]);
                     unset($values["noPacket"]);
                 }
@@ -1910,17 +1614,17 @@ class BaseAPI{
         }
         return true;
     }
-
-    /**
-     * Return an array with the following values:
-     * 0 => Timestamp integer
-     * 1 => The rest of the string (removing any "space" between time codes)
-     *
-     * @param string $string
-     *
-     * @return array|null
-     */
-    public function stringToTimestamp(string $string): ?array{
+	
+	/**
+	 * Return an array with the following values:
+	 * 0 => Timestamp integer
+	 * 1 => The rest of the string (removing any "space" between time codes)
+	 *
+	 * @param string $string
+	 * @return array|null
+	 * @throws \Exception
+	 */
+	public function stringToTimestamp(string $string): ?array{
         /**
          * Rules:
          * Integers without suffix are considered as seconds
@@ -2154,93 +1858,6 @@ class BaseAPI{
         $this->setUnlimited($player, !$this->isUnlimitedEnabled($player));
     }
 
-    /**  _    _           _       _
-     *  | |  | |         | |     | |
-     *  | |  | |_ __   __| | __ _| |_ ___ _ __
-     *  | |  | | '_ \ / _` |/ _` | __/ _ | '__|
-     *  | |__| | |_) | (_| | (_| | ||  __| |
-     *   \____/| .__/ \__,_|\__,_|\__\___|_|
-     *         | |
-     *         |_|
-     */
-
-    /** @var UpdateFetchTask */
-    private $updaterTask = null;
-
-    /** @var UpdateInstallTask */
-    public $updaterDownloadTask = null; // Used to prevent Async Task conflicts with Server's limit :P
-
-    /**
-     * Tell if the auto-updater is enabled or not
-     *
-     * @return bool
-     */
-    public function isUpdaterEnabled(): bool{
-        return $this->getEssentialsPEPlugin()->getConfig()->getNested("updater.enabled");
-    }
-
-    /**
-     * Tell the build of the updater for EssentialsPE
-     *
-     * @return string
-     */
-    public function getUpdateBuild(): string{
-        return $this->getEssentialsPEPlugin()->getConfig()->getNested("updater.channel", "stable");
-    }
-
-    /**
-     * Get the interval for the updater to get in action
-     *
-     * @return int
-     */
-    public function getUpdaterInterval(): int{
-        return $this->getEssentialsPEPlugin()->getConfig()->getNested("updater.time-interval");
-    }
-
-    /**
-     * Get the latest version, and install it if you want
-     *
-     * @param bool $install
-     *
-     * @return bool
-     */
-    public function fetchEssentialsPEUpdate(bool $install = false): bool{
-        if(($this->updaterTask !== null && $this->updaterTask->isRunning()) && ($this->updaterDownloadTask !== null && $this->updaterDownloadTask->isRunning())){
-            return false;
-        }
-        $this->getServer()->getLogger()->debug(TextFormat::YELLOW . "Running EssentialsPE's UpdateFetchTask");
-        $this->getServer()->getAsyncPool()->submitTask($task = new UpdateFetchTask($this->getUpdateBuild(), $install));
-        $this->updaterTask = $task;
-        return true;
-    }
-
-    /**
-     * Schedules the updater task :3
-     */
-    public function scheduleUpdaterTask(): void{
-        if($this->isUpdaterEnabled()){
-            $this->getEssentialsPEPlugin()->getScheduler()->scheduleDelayedTask(new AutoFetchCallerTask($this), $this->getUpdaterInterval() * 20);
-        }
-    }
-
-    /**
-     * Warn about a new update of EssentialsPE
-     *
-     * @param string $message
-     */
-    public function broadcastUpdateAvailability(string $message): void{
-        if($this->getEssentialsPEPlugin()->getConfig()->getNested("updater.warn-console")){
-            $this->getServer()->getLogger()->info($message);
-        }
-        if($this->getEssentialsPEPlugin()->getConfig()->getNested("updater.warn-players")){
-            foreach($this->getServer()->getOnlinePlayers() as $p){
-                if($p->hasPermission("essentials.update.notify")){
-                    $p->sendMessage($message);
-                }
-            }
-        }
-    }
-
     /** __      __         _     _
      *  \ \    / /        (_)   | |
      *   \ \  / __ _ _ __  _ ___| |__
@@ -2249,7 +1866,7 @@ class BaseAPI{
      *      \/ \__,_|_| |_|_|___|_| |_|
      */
 
-    /** @var null|Effect */
+    /** @var EffectInstance|null */
     private $invisibilityEffect = null;
 
     /**
@@ -2285,8 +1902,7 @@ class BaseAPI{
      */
     public function setVanish(Player $player, bool $state, bool $noPacket = false): bool{
         if($this->invisibilityEffect === null){
-            $effect = new Effect(Effect::INVISIBILITY, "Vanish", 127, 131, 146);
-            $effect->setDuration(INT32_MAX);
+            $effect = new EffectInstance(Effect::getEffect(Effect::INVISIBILITY), INT32_MAX, 0, false);
             $this->invisibilityEffect = $effect;
         }
         $this->getServer()->getPluginManager()->callEvent($ev = new PlayerVanishEvent($this, $player, $state, $noPacket));
