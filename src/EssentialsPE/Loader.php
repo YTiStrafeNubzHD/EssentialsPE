@@ -16,14 +16,6 @@ use EssentialsPE\Commands\ClearInventory;
 use EssentialsPE\Commands\Compass;
 use EssentialsPE\Commands\Condense;
 use EssentialsPE\Commands\Depth;
-use EssentialsPE\Commands\Economy\Balance;
-use EssentialsPE\Commands\Economy\Eco;
-use EssentialsPE\Commands\Economy\Pay;
-use EssentialsPE\Commands\Economy\Sell;
-use EssentialsPE\Commands\Economy\SetWorth;
-use EssentialsPE\Commands\Economy\Worth;
-use EssentialsPE\Commands\Economy\BalanceTop;
-use EssentialsPE\Commands\EssentialsPE;
 use EssentialsPE\Commands\Feed;
 use EssentialsPE\Commands\Extinguish;
 use EssentialsPE\Commands\Fly;
@@ -37,7 +29,6 @@ use EssentialsPE\Commands\ItemCommand;
 use EssentialsPE\Commands\ItemDB;
 use EssentialsPE\Commands\Jump;
 use EssentialsPE\Commands\KickAll;
-use EssentialsPE\Commands\Kit;
 use EssentialsPE\Commands\Lightning;
 use EssentialsPE\Commands\More;
 use EssentialsPE\Commands\Mute;
@@ -86,11 +77,9 @@ use pocketmine\utils\TextFormat;
 class Loader extends PluginBase{
     /** @var BaseAPI */
     private $api;
+    private const version = "0.0.4";
 
     public function onEnable(): void{
-        if($this->getConfig()->get("enable") === false) {
-           $this->setEnabled(false);
-        }
         // Before anything else...
         $this->checkConfig();
 
@@ -103,15 +92,13 @@ class Loader extends PluginBase{
         if(!is_dir($this->getDataFolder())){
             mkdir($this->getDataFolder());
         }
-        
-		$this->getLogger()->info(TextFormat::YELLOW . "Loading...");
+	
+	$this->getLogger()->info(TextFormat::YELLOW . "Loading..."); 
+	    
         $this->registerEvents();
         $this->registerCommands();
         if(count($p = $this->getServer()->getOnlinePlayers()) > 0){
             $this->getAPI()->createSession($p);
-        }
-        if($this->getAPI()->isUpdaterEnabled()){
-            $this->getAPI()->fetchEssentialsPEUpdate(false);
         }
         $this->getAPI()->scheduleAutoAFKSetter();
     }
@@ -149,7 +136,6 @@ class Loader extends PluginBase{
             new Compass($this->getAPI()),
             new Condense($this->getAPI()),
             new Depth($this->getAPI()),
-            new EssentialsPE($this->getAPI()),
             new Extinguish($this->getAPI()),
             new Fly($this->getAPI()),
             new GetPos($this->getAPI()),
@@ -160,7 +146,6 @@ class Loader extends PluginBase{
             new ItemDB($this->getAPI()),
             new Jump($this->getAPI()),
             new KickAll($this->getAPI()),
-            new Kit($this->getAPI()),
             new Lightning($this->getAPI()),
             new More($this->getAPI()),
             new Mute($this->getAPI()),
@@ -194,16 +179,6 @@ class Loader extends PluginBase{
             // Override
             new Gamemode($this->getAPI()),
             new Kill($this->getAPI())		
-		];
-	    
-		$economyCommands = [
-	        new Balance($this->getAPI()),
-	        new Eco($this->getAPI()),
-	        new Pay($this->getAPI()),
-	        new Sell($this->getAPI()),
-	        new SetWorth($this->getAPI()),
-	        new Worth($this->getAPI()),
-	        new BalanceTop($this->getAPI())
 		];
 
 		$homeCommands = [
@@ -260,11 +235,6 @@ class Loader extends PluginBase{
 			 $commands[] = $homeCommand;
 		    }
 		}
-		foreach($economyCommands as $economyCommand) {
-		    if($this->getConfig()->get("economy") === true) {
-			 $commands[] = $economyCommand;
-		    }
-		}
 	    
         $aliased = [];
         foreach($commands as $cmd){
@@ -293,12 +263,10 @@ class Loader extends PluginBase{
         if(!file_exists($this->getDataFolder() . "config.yml")){
             $this->saveDefaultConfig();
         }
-        $this->saveResource("Economy.yml");
-        $this->saveResource("Kits.yml");
         $this->saveResource("Warps.yml");
         $cfg = $this->getConfig();
 
-        if(!$cfg->exists("version") || $cfg->get("version") !== "0.0.3"){
+        if(!$cfg->exists("version") || $cfg->get("version") !== self::version){
             $this->getLogger()->debug(TextFormat::RED . "An invalid config file was found, generating a new one...");
             rename($this->getDataFolder() . "config.yml", $this->getDataFolder() . "config.yml.old");
             $this->saveDefaultConfig();
@@ -370,33 +338,6 @@ class Loader extends PluginBase{
             }
             if($value !== null){
                 $this->getConfig()->setNested("afk." . $key, $value);
-            }
-        }
-
-        $updater = ["enabled", "time-interval", "warn-console", "warn-players", "channel"];
-        foreach($updater as $key){
-            $value = null;
-            $k = $this->getConfig()->getNested("updater." . $key);
-            switch($key){
-                case "time-interval":
-                    if(!is_int($k)){
-                        $value = 1800;
-                    }
-                    break;
-                case "enabled":
-                case "warn-console":
-                case "warn-players":
-                    if(!is_bool($k)){
-                        $value = true;
-                    }
-                    break;
-                case "channel":
-                    if(!is_string($k) || ($k !== "stable" && $k !== "beta" && $k !== "development")){
-                        $value = "stable";
-                    }
-            }
-            if($value !== null){
-                $this->getConfig()->setNested("updater." . $key, $value);
             }
         }
     }
