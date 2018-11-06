@@ -1133,7 +1133,7 @@ class BaseAPI{
     public function removeNick(Player $player): bool{
 	$ev = new PlayerNickChangeEvent($this, $player, $player->getName());
 	$ev->call();
-        if($event->isCancelled()){
+        if($ev->isCancelled()){
             return false;
         }
         $this->getSession($player)->setNick(null);
