@@ -1498,7 +1498,8 @@ class BaseAPI{
                     $values[$k] = $v;
                 }
                 $this->getEssentialsPEPlugin()->getLogger()->debug("Creating virtual session...");
-                $this->getServer()->getPluginManager()->callEvent($ev = new SessionCreateEvent($this, $p, $values));
+		$ev = new SessionCreateEvent($this, $p, $values);
+		$ev->call();
                 $this->getEssentialsPEPlugin()->getLogger()->debug("Setting up new values...");
                 $values = $ev->getValues();
                 $m = BaseSession::$defaults["isMuted"];
