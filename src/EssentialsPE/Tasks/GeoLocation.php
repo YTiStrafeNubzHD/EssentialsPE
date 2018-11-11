@@ -55,7 +55,7 @@ class GeoLocation extends AsyncTask{
     /**
      * @param Server $server
      */
-    public function onCompletion(Server $server): void{
+    public function onCompletion(): void{
         /** @var Loader $plugin */
         $plugin = $server->getPluginManager()->getPlugin("EssentialsPE");
         if(!is_array($this->getResult())){
