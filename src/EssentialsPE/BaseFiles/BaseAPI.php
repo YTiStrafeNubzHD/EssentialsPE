@@ -219,7 +219,8 @@ class BaseAPI{
      * @return bool
      */
     public function setAFKMode(Player $player, bool $state, bool $broadcast = true): bool{
-        $this->getServer()->getPluginManager()->callEvent($ev = new PlayerAFKModeChangeEvent($this, $player, $state, $broadcast));
+	$ev = new PlayerAFKModeChangeEvent($this, $player, $state, $broadcast);
+	$ev->call();
         if($ev->isCancelled()){
             return false;
         }
@@ -504,7 +505,8 @@ class BaseAPI{
      * @return bool
      */
     public function setFlying(Player $player, bool $mode): bool{
-        $this->getServer()->getPluginManager()->callEvent($ev = new PlayerFlyModeChangeEvent($this, $player, $mode));
+	$ev = new PlayerFlyModeChangeEvent($this, $player, $mode);
+	$ev->call();
         if($ev->isCancelled()){
             return false;
         }
@@ -1053,7 +1055,8 @@ class BaseAPI{
      */
     public function setMute(Player $player, bool $state, \DateTime $expires = null, bool $notify = true): bool{
         if($this->isMuted($player) !== $state){
-            $this->getServer()->getPluginManager()->callEvent($ev = new PlayerMuteEvent($this, $player, $state, $expires));
+	    $ev = new PlayerMuteEvent($this, $player, $state, $expires);
+	    $ev->call();
             if($ev->isCancelled()){
                 return false;
             }
@@ -1111,7 +1114,8 @@ class BaseAPI{
         if(strtolower($nick) === strtolower($player->getName()) || $nick === "off" || trim($nick) === "" || $nick === null){
             return $this->removeNick($player);
         }
-        $this->getServer()->getPluginManager()->callEvent($ev = new PlayerNickChangeEvent($this, $player, $this->colorMessage($nick)));
+	$ev = new PlayerNickChangeEvent($this, $player, $this->colorMessage($nick));
+	$ev->call();
         if($ev->isCancelled()){
             return false;
         }
@@ -1127,8 +1131,9 @@ class BaseAPI{
      * @return bool
      */
     public function removeNick(Player $player): bool{
-        $this->getServer()->getPluginManager()->callEvent($event = new PlayerNickChangeEvent($this, $player, $player->getName()));
-        if($event->isCancelled()){
+	$ev = new PlayerNickChangeEvent($this, $player, $player->getName());
+	$ev->call();
+        if($ev->isCancelled()){
             return false;
         }
         $this->getSession($player)->setNick(null);
@@ -1498,7 +1503,8 @@ class BaseAPI{
                     $values[$k] = $v;
                 }
                 $this->getEssentialsPEPlugin()->getLogger()->debug("Creating virtual session...");
-                $this->getServer()->getPluginManager()->callEvent($ev = new SessionCreateEvent($this, $p, $values));
+		$ev = new SessionCreateEvent($this, $p, $values);
+		$ev->call();
                 $this->getEssentialsPEPlugin()->getLogger()->debug("Setting up new values...");
                 $values = $ev->getValues();
                 $m = BaseSession::$defaults["isMuted"];
@@ -1841,7 +1847,8 @@ class BaseAPI{
      * @return bool
      */
     public function setUnlimited(Player $player, bool $mode): bool{
-        $this->getServer()->getPluginManager()->callEvent($ev = new PlayerUnlimitedModeChangeEvent($this, $player, $mode));
+	$ev = new PlayerUnlimitedModeChangeEvent($this, $player, $mode);
+	$ev->call();
         if($ev->isCancelled()){
             return false;
         }
@@ -1905,7 +1912,8 @@ class BaseAPI{
             $effect = new EffectInstance(Effect::getEffect(Effect::INVISIBILITY), INT32_MAX, 0, false);
             $this->invisibilityEffect = $effect;
         }
-        $this->getServer()->getPluginManager()->callEvent($ev = new PlayerVanishEvent($this, $player, $state, $noPacket));
+	$ev = new PlayerVanishEvent($this, $player, $state, $noPacket);
+	$ev->call();
         if($ev->isCancelled()){
             return false;
         }
