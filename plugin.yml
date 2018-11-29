@@ -506,4 +506,4 @@ permissions:
                 description: "Display information about a player"
             essentials.world:
                 default: op
-                description: "Teleport to another world"
+                description: "Teleport to another world" 
