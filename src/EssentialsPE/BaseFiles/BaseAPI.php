@@ -598,7 +598,9 @@ class BaseAPI{
      * @return bool
      */
     public function setGodMode(Player $player, bool $state): bool{
-        $this->getServer()->getPluginManager()->callEvent($ev = new PlayerGodModeChangeEvent($this, $player, $state));
+        $ev = new PlayerGodModeChangeEvent($this, $player, $state);
+	$ev->call();
+	    
         if($ev->isCancelled()){
             return false;
         }
